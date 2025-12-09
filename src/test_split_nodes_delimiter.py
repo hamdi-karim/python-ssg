@@ -1,6 +1,10 @@
 import unittest
 
-from split_nodes_delimiter import split_nodes_delimiter
+from split_nodes_delimiter import (
+    split_nodes_delimiter,
+    split_nodes_image,
+    split_nodes_link,
+)
 from textnode import TextNode, TextType
 
 
@@ -89,3 +93,77 @@ class TestSplitNodesDelimiter(unittest.TestCase):
             ],
             new_nodes,
         )
+
+
+class TestSplitNodesImage(unittest.TestCase):
+    def test_image_split(self):
+        node = TextNode(
+            "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png)",
+            TextType.TEXT,
+        )
+        new_nodes = split_nodes_image([node])
+        self.assertListEqual(
+            [
+                TextNode("This is text with an ", TextType.TEXT),
+                TextNode("image", TextType.IMAGE, "https://i.imgur.com/zjjcJKZ.png"),
+            ],
+            new_nodes,
+        )
+
+    def test_multiple_images(self):
+        node = TextNode(
+            "![first](https://img.com/1.png) text ![second](https://img.com/2.jpg)",
+            TextType.TEXT,
+        )
+        new_nodes = split_nodes_image([node])
+        self.assertListEqual(
+            [
+                TextNode("first", TextType.IMAGE, "https://img.com/1.png"),
+                TextNode(" text ", TextType.TEXT),
+                TextNode("second", TextType.IMAGE, "https://img.com/2.jpg"),
+            ],
+            new_nodes,
+        )
+
+    def test_no_images_returns_original(self):
+        node = TextNode("No images here", TextType.TEXT)
+        new_nodes = split_nodes_image([node])
+        self.assertListEqual([node], new_nodes)
+
+
+class TestSplitNodesLink(unittest.TestCase):
+    def test_link_split(self):
+        node = TextNode(
+            "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)",
+            TextType.TEXT,
+        )
+        new_nodes = split_nodes_link([node])
+        self.assertListEqual(
+            [
+                TextNode("This is text with a link ", TextType.TEXT),
+                TextNode("to boot dev", TextType.LINK, "https://www.boot.dev"),
+                TextNode(" and ", TextType.TEXT),
+                TextNode(
+                    "to youtube",
+                    TextType.LINK,
+                    "https://www.youtube.com/@bootdotdev",
+                ),
+            ],
+            new_nodes,
+        )
+
+    def test_multiple_links(self):
+        node = TextNode("[one](https://one.com)[two](https://two.com)", TextType.TEXT)
+        new_nodes = split_nodes_link([node])
+        self.assertListEqual(
+            [
+                TextNode("one", TextType.LINK, "https://one.com"),
+                TextNode("two", TextType.LINK, "https://two.com"),
+            ],
+            new_nodes,
+        )
+
+    def test_no_links_returns_original(self):
+        node = TextNode("No links here", TextType.TEXT)
+        new_nodes = split_nodes_link([node])
+        self.assertListEqual([node], new_nodes)
