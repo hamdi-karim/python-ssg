@@ -1,6 +1,6 @@
 import unittest
 
-from regex_matching.extract_markdown_images import extract_markdown_images
+from extraction_utilities.extract_markdown_images import extract_markdown_images
 
 
 class TestExtractMarkdownImages(unittest.TestCase):

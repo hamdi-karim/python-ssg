@@ -1,6 +1,6 @@
 import unittest
 
-from regex_matching.extract_markdown_links import extract_markdown_links
+from extraction_utilities.extract_markdown_links import extract_markdown_links
 
 
 class TestExtractMarkdownLinks(unittest.TestCase):
