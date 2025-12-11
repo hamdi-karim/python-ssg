@@ -1,27 +1,18 @@
-import textwrap
-
-
 def markdown_to_blocks(markdown):
-    """Split a raw markdown document into top-level blocks separated by blank lines."""
+    """Split a markdown document into blocks separated by blank lines."""
     if markdown is None:
         return []
 
-    normalized = textwrap.dedent(markdown)
-    if not normalized.strip():
+    if not markdown.strip():
         return []
 
-    blocks = []
-    current_lines = []
+    blocks = markdown.split("\n\n")
+    filtered_blocks = []
 
-    for line in normalized.strip("\n").split("\n"):
-        if line.strip() == "":
-            if current_lines:
-                blocks.append("\n".join(current_lines).strip("\n"))
-                current_lines = []
+    for block in blocks:
+        if block == "":
             continue
-        current_lines.append(line)
+        block = block.strip()
+        filtered_blocks.append(block)
 
-    if current_lines:
-        blocks.append("\n".join(current_lines).strip("\n"))
-
-    return blocks
+    return filtered_blocks

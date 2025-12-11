@@ -33,7 +33,7 @@ TextNode(link, link, https://boot.dev)
 
 ## Markdown Block Splitter
 
-`markdown_to_blocks` (`src/markdown_to_blocks.py`) slices a raw Markdown document into logical blocks separated by blank lines (paragraphs, lists, code fences, etc.). It dedents the source once, preserves indentation inside each block, and drops empty blocks so downstream parsers can operate on clean chunks.
+`markdown_to_blocks` (`src/markdown_to_blocks.py`) slices a raw Markdown document into logical blocks separated by blank lines (paragraphs, lists, code fences, etc.). It performs a simple `split("\n\n")`, trims leading/trailing whitespace on each block, and skips blank results so downstream parsers can operate on clean chunks.
 
 ```bash
 python3 - <<'PY'
