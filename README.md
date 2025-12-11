@@ -30,3 +30,34 @@ TextNode(obi wan image, image, https://i.imgur.com/fJRm4Vk.jpeg)
 TextNode( and a , text, None)
 TextNode(link, link, https://boot.dev)
 ```
+
+## Markdown Block Splitter
+
+`markdown_to_blocks` (`src/markdown_to_blocks.py`) slices a raw Markdown document into logical blocks separated by blank lines (paragraphs, lists, code fences, etc.). It dedents the source once, preserves indentation inside each block, and drops empty blocks so downstream parsers can operate on clean chunks.
+
+```bash
+python3 - <<'PY'
+from markdown_to_blocks import markdown_to_blocks
+
+doc = """
+This is **bolded** paragraph
+
+This is another paragraph with _italic_ text and `code` here
+This is the same paragraph on a new line
+
+- This is a list
+- with items
+"""
+
+print(markdown_to_blocks(doc))
+PY
+```
+
+Output:
+```
+[
+  'This is **bolded** paragraph',
+  'This is another paragraph with _italic_ text and `code` here\nThis is the same paragraph on a new line',
+  '- This is a list\n- with items'
+]
+```
