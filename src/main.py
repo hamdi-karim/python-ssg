@@ -60,6 +60,22 @@ def generate_page(from_path, template_path, dest_path):
         output_file.write(page_html)
 
 
+def generate_pages_recursive(content_dir_path, template_path, dest_dir_path):
+    """Generate HTML pages for all markdown files under content_dir_path."""
+
+    for root, _, files in os.walk(content_dir_path):
+        for filename in files:
+            if not filename.endswith(".md"):
+                continue
+
+            from_path = os.path.join(root, filename)
+            relative_path = os.path.relpath(from_path, content_dir_path)
+            dest_path = os.path.join(
+                dest_dir_path, relative_path.replace(".md", ".html")
+            )
+            generate_page(from_path, template_path, dest_path)
+
+
 def main():
     print("Deleting public directory...")
     if os.path.exists(dir_path_public):
@@ -68,12 +84,8 @@ def main():
     print("Copying static files to public directory...")
     copy_files_recursive(dir_path_static, dir_path_public)
 
-    print("Generating index page...")
-    generate_page(
-        os.path.join(dir_path_content, "index.md"),
-        template_path,
-        os.path.join(dir_path_public, "index.html"),
-    )
+    print("Generating site pages...")
+    generate_pages_recursive(dir_path_content, template_path, dir_path_public)
 
 
 if __name__ == "__main__":

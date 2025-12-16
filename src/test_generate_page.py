@@ -2,7 +2,7 @@ import os
 import tempfile
 import unittest
 
-from main import generate_page
+from main import generate_page, generate_pages_recursive
 
 
 class TestGeneratePage(unittest.TestCase):
@@ -43,6 +43,38 @@ class TestGeneratePage(unittest.TestCase):
 
             with self.assertRaises(ValueError):
                 generate_page(markdown_path, template_path, dest_path)
+
+    def test_generate_pages_recursive_builds_nested_structure(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            content_root = os.path.join(tmpdir, "content")
+            os.makedirs(os.path.join(content_root, "blog", "post"), exist_ok=True)
+
+            index_md = os.path.join(content_root, "index.md")
+            blog_md = os.path.join(content_root, "blog", "post", "index.md")
+            template_path = os.path.join(tmpdir, "template.html")
+            dest_root = os.path.join(tmpdir, "public")
+
+            with open(index_md, "w") as index_file:
+                index_file.write("# Home\n\nWelcome")
+
+            with open(blog_md, "w") as blog_file:
+                blog_file.write("# Blog Post\n\nContent")
+
+            with open(template_path, "w") as template_file:
+                template_file.write(
+                    "<html><head><title>{{ Title }}</title></head>"
+                    "<body>{{ Content }}</body></html>"
+                )
+
+            generate_pages_recursive(content_root, template_path, dest_root)
+
+            with open(os.path.join(dest_root, "index.html")) as index_output:
+                self.assertIn("<title>Home</title>", index_output.read())
+
+            with open(os.path.join(dest_root, "blog", "post", "index.html")) as post:
+                contents = post.read()
+                self.assertIn("<title>Blog Post</title>", contents)
+                self.assertIn("<h1>Blog Post</h1>", contents)
 
 
 if __name__ == "__main__":
