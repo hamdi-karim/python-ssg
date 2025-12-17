@@ -1,11 +1,12 @@
 import os
 import shutil
+import sys
 
 from extraction_utilities.extract_title import extract_title
 from markdown_to_html_node import markdown_to_html_node
 
 dir_path_static = "./static"
-dir_path_public = "./public"
+dir_path_public = "./docs"
 dir_path_content = "./content"
 template_path = "./template.html"
 
@@ -28,7 +29,7 @@ def copy_files_recursive(source_dir_path, dest_dir_path):
             copy_files_recursive(from_path, dest_path)
 
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, base_path="/"):
     """
     Render a markdown file into a full HTML page using the provided template.
 
@@ -52,6 +53,11 @@ def generate_page(from_path, template_path, dest_path):
         template.replace("{{ Title }}", title).replace("{{ Content }}", html_content)
     )
 
+    page_html = (
+        page_html.replace('href="/', f'href="{base_path}')
+        .replace('src="/', f'src="{base_path}')
+    )
+
     dest_dir = os.path.dirname(dest_path)
     if dest_dir:
         os.makedirs(dest_dir, exist_ok=True)
@@ -60,7 +66,7 @@ def generate_page(from_path, template_path, dest_path):
         output_file.write(page_html)
 
 
-def generate_pages_recursive(content_dir_path, template_path, dest_dir_path):
+def generate_pages_recursive(content_dir_path, template_path, dest_dir_path, base_path="/"):
     """Generate HTML pages for all markdown files under content_dir_path."""
 
     for root, _, files in os.walk(content_dir_path):
@@ -73,19 +79,22 @@ def generate_pages_recursive(content_dir_path, template_path, dest_dir_path):
             dest_path = os.path.join(
                 dest_dir_path, relative_path.replace(".md", ".html")
             )
-            generate_page(from_path, template_path, dest_path)
+            generate_page(from_path, template_path, dest_path, base_path)
 
 
 def main():
-    print("Deleting public directory...")
+    base_path = sys.argv[1] if len(sys.argv) > 1 else "/"
+    print(f"Using base path: {base_path}")
+
+    print(f"Deleting {dir_path_public} directory...")
     if os.path.exists(dir_path_public):
         shutil.rmtree(dir_path_public)
 
-    print("Copying static files to public directory...")
+    print(f"Copying static files to {dir_path_public} directory...")
     copy_files_recursive(dir_path_static, dir_path_public)
 
     print("Generating site pages...")
-    generate_pages_recursive(dir_path_content, template_path, dir_path_public)
+    generate_pages_recursive(dir_path_content, template_path, dir_path_public, base_path)
 
 
 if __name__ == "__main__":

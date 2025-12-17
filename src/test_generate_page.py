@@ -44,6 +44,28 @@ class TestGeneratePage(unittest.TestCase):
             with self.assertRaises(ValueError):
                 generate_page(markdown_path, template_path, dest_path)
 
+    def test_base_path_replaces_root_links(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            markdown_path = os.path.join(tmpdir, "page.md")
+            template_path = os.path.join(tmpdir, "template.html")
+            dest_path = os.path.join(tmpdir, "index.html")
+
+            with open(markdown_path, "w") as markdown_file:
+                markdown_file.write("# Hello\n\nContent")
+
+            with open(template_path, "w") as template_file:
+                template_file.write(
+                    '<a href="/home">Home</a><img src="/img.png" />{{ Content }}'
+                )
+
+            generate_page(markdown_path, template_path, dest_path, base_path="/blog")
+
+            with open(dest_path, "r") as output_file:
+                output = output_file.read()
+
+            self.assertIn('href="/bloghome"', output)
+            self.assertIn('src="/blogimg.png"', output)
+
     def test_generate_pages_recursive_builds_nested_structure(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             content_root = os.path.join(tmpdir, "content")
@@ -66,7 +88,7 @@ class TestGeneratePage(unittest.TestCase):
                     "<body>{{ Content }}</body></html>"
                 )
 
-            generate_pages_recursive(content_root, template_path, dest_root)
+            generate_pages_recursive(content_root, template_path, dest_root, base_path="/blog")
 
             with open(os.path.join(dest_root, "index.html")) as index_output:
                 self.assertIn("<title>Home</title>", index_output.read())
