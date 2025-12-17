@@ -10,7 +10,7 @@ class TestLeafNode(unittest.TestCase):
 
     def test_leaf_to_html_p_with_props(self):
         node = LeafNode("p", "Hello, world!", props={"class": "container"})
-        self.assertEqual(node.to_html(), "<p class=container>Hello, world!</p>")
+        self.assertEqual(node.to_html(), '<p class="container">Hello, world!</p>')
 
     def test_leaf_to_html_raises_without_value(self):
         with self.assertRaises(ValueError):
